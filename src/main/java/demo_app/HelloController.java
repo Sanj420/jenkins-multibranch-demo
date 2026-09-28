@@ -8,7 +8,7 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Hello from Jenkins Multibranch POC!";
+        return "Hello from Feature Branch!";
     }
 
     @GetMapping("/health")
