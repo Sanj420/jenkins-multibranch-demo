@@ -90,14 +90,22 @@ stage('Push Artifact to Nexus') {
                 passwordVariable: 'NEXUS_PASSWORD'
             )
         ]) {
+            script {
+                if (env.BRANCH_NAME == 'main') {
+                    env.ARTIFACT_VERSION = "1.0.${env.BUILD_NUMBER}"
+                } else {
+                    env.ARTIFACT_VERSION = "0.0.1-feature-${env.BUILD_NUMBER}"
+                }
+            }
+
             sh '''
                 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
                 export PATH=$JAVA_HOME/bin:$PATH
 
-                VERSION="0.0.1-feature-${BUILD_NUMBER}"
+                echo "Uploading version: $ARTIFACT_VERSION"
 
                 ./mvnw versions:set \
-                  -DnewVersion=$VERSION \
+                  -DnewVersion=$ARTIFACT_VERSION \
                   -DgenerateBackupPoms=false
 
                 cat > settings.xml <<EOF
@@ -121,7 +129,6 @@ EOF
         }
     }
 }
-
 
         stage('Deploy to EC2') {
             when {
