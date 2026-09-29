@@ -80,5 +80,47 @@ stage('Quality Gate') {
     }
 }
 
+
+stage('Push Artifact to Nexus') {
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'nexus-credentials',
+                usernameVariable: 'NEXUS_USERNAME',
+                passwordVariable: 'NEXUS_PASSWORD'
+            )
+        ]) {
+            sh '''
+                export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                export PATH=$JAVA_HOME/bin:$PATH
+
+                VERSION="0.0.1-feature-${BUILD_NUMBER}"
+
+                ./mvnw versions:set \
+                  -DnewVersion=$VERSION \
+                  -DgenerateBackupPoms=false
+
+                cat > settings.xml <<EOF
+<settings>
+  <servers>
+    <server>
+      <id>nexus-releases</id>
+      <username>${NEXUS_USERNAME}</username>
+      <password>${NEXUS_PASSWORD}</password>
+    </server>
+  </servers>
+</settings>
+EOF
+
+                ./mvnw deploy \
+                  -DskipTests \
+                  -s settings.xml
+
+                rm -f settings.xml
+            '''
+        }
+    }
+}
+
     }
 }
