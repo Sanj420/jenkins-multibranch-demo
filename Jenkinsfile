@@ -16,12 +16,12 @@ pipeline {
     steps {
         sh '''
             echo "JAVA_HOME=$JAVA_HOME"
-            java -version
-            javac -version
-            mvn -version
+            which java
+            readlink -f $(which java)
+            ls -l /usr/lib/jvm/
         '''
     }
-	}
+}
 
         stage('Build') {
             steps {
