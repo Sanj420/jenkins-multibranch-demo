@@ -1,7 +1,7 @@
 pipeline {
     agent {
-    label 'jenkins-agent'
-	}
+        label 'jenkins-agent'
+    }
 
     stages {
 
@@ -11,29 +11,40 @@ pipeline {
             }
         }
 
+        stage('Check Java') {
+            steps {
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    export PATH=$JAVA_HOME/bin:$PATH
 
-	stage('Check Java') {
-    steps {
-        sh '''
-            echo "JAVA_HOME=$JAVA_HOME"
-            which java
-            readlink -f $(which java)
-            ls -l /usr/lib/jvm/
-        '''
-    }
-}
+                    echo "JAVA_HOME=$JAVA_HOME"
+                    java -version
+                    javac -version
+                    ./mvnw -version
+                '''
+            }
+        }
 
         stage('Build') {
             steps {
-                sh './mvnw clean package -DskipTests'
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    export PATH=$JAVA_HOME/bin:$PATH
+
+                    ./mvnw clean package -DskipTests
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    export PATH=$JAVA_HOME/bin:$PATH
+
+                    ./mvnw test
+                '''
             }
         }
-
     }
 }
