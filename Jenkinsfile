@@ -94,7 +94,11 @@ stage('Push Artifact to Nexus') {
                 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
                 export PATH=$JAVA_HOME/bin:$PATH
 
-                VERSION="0.0.1-feature-${BUILD_NUMBER}"
+                if [ "$BRANCH_NAME" = "main" ]; then
+			 VERSION="1.0.${BUILD_NUMBER}"
+		else
+			VERSION="0.0.1-feature-${BUILD_NUMBER}"
+		fi
 
                 ./mvnw versions:set \
                   -DnewVersion=$VERSION \
