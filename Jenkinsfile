@@ -47,5 +47,29 @@ pipeline {
                 '''
             }
         }
+
+stage('SonarQube Analysis') {
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            withCredentials([
+                string(
+                    credentialsId: 'sonarqube-token',
+                    variable: 'SONAR_AUTH_TOKEN'
+                )
+            ]) {
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                    export PATH=$JAVA_HOME/bin:$PATH
+
+                    ./mvnw sonar:sonar \
+                      -Dsonar.projectKey=demo-app \
+                      -Dsonar.projectName=demo-app \
+                      -Dsonar.token=$SONAR_AUTH_TOKEN
+                '''
+            }
+        }
+    }
+}
+
     }
 }
