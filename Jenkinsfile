@@ -50,7 +50,7 @@ pipeline {
 
 stage('SonarQube Analysis') {
     steps {
-        withSonarQubeEnv('SonarQube') {
+        withSonarQubeEnv('SonarQube Demo') {
             withCredentials([
                 string(
                     credentialsId: 'sonarqube-token',
