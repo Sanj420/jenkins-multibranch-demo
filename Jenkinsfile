@@ -122,5 +122,40 @@ EOF
     }
 }
 
+
+        stage('Deploy to EC2') {
+            when {
+                branch 'main'
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexus-credentials',
+                        usernameVariable: 'NEXUS_USERNAME',
+                        passwordVariable: 'NEXUS_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                        export PATH=$JAVA_HOME/bin:$PATH
+
+                        VERSION="1.0.${BUILD_NUMBER}"
+
+                        curl -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+                          -o demo-app.jar \
+                          "http://172.31.6.148:8081/repository/maven-releases/com/example/demo-app/${VERSION}/demo-app-${VERSION}.jar"
+
+                        pkill -f 'demo-app.jar' || true
+
+                        nohup java -jar demo-app.jar > app.log 2>&1 &
+
+                        sleep 10
+
+                        curl -f http://localhost:8080/health
+                    '''
+                }
+            }
+        }
+
     }
 }
